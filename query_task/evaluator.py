@@ -3,7 +3,7 @@ import json
 import elasticsearch
 from elasticsearch import Elasticsearch
 import utils
-
+from abc import ABC, abstractmethod
 
 es = Elasticsearch()
 
@@ -19,9 +19,32 @@ for topic in test_topics:
 # Load test relevancy judgements
 test_qrels_path = "../baseline/2019qrels_nowapo.txt"
 with open(test_qrels_path, 'r') as f:
-    qrels = []
+    test_qrels = []
     for line in f:
-        qrels.append(line.strip())
+        test_qrels.append(line.strip())
+
+
+
+class QueryExpander(ABC):
+    
+    def __init__(self):
+        self.question_history = {}
+        self.query_history = {}
+        
+    def get_query(self, query, depth, topic_num):        
+        generated_query = self.generate_query(query, depth, topic_num)
+        
+        if topic_num not in self.question_history:
+            self.question_history[topic_num] = []
+            self.query_history = []
+        self.question_history[topic_num].append(query)
+        self.query_history.append(generated_query)
+        return generated_query
+        
+    @abstractmethod
+    def generate_query(self, query, depth, topic_num):
+        pass
+
 
 
 def get_search_data(query, qid, qrels, es, index, size=10):
@@ -85,3 +108,47 @@ def analyzer(es, query, index):
     analyzed = es.indices.analyze(index=index, body={'text': query})
     analyzed = sorted(analyzed['tokens'], key=lambda x: x['position']) # Ensure query is in correct order
     return [i['token'] for i in analyzed]
+
+
+
+def evaluate(es, index, size, qm, topics=test_topics, qrels=test_qrels, k=3):
+    """
+    Args:
+        es: running elasticsearch instance
+        index: name of es index to query against
+        size: number of items to return from each es search
+        qm: query model that inherits the QueryExpander class
+        topics: topics file in json format (test or train)
+        qrels: relevant list of qrel assesments (test or train)
+        k: NDCG@k. default is 3 (official metric for TREC2019)
+
+    Returns:
+        data: dictionary with search result data. can be fed directly into to_run_file
+        scores: NDCG@k scores for all queries
+        turn_depth_scores: NDCG@k scores at each depth of an conversation
+    """
+    data = {}
+    turn_depth_scores = {}
+    scores = []
+    for topic in topics:
+        topic_num = topic['number']
+        for depth, turn in enumerate(topic['turn']):
+            query = qm.get_query(query=turn['raw_utterance'], depth=depth, topic_num=topic_num)
+            search_results, system_ranking, ground_truth = get_search_data(query,
+                                                                           turn['qid'],
+                                                                           qrels,
+                                                                           es,
+                                                                           index,
+                                                                           size)
+
+            if search_results is None:
+                continue
+
+            data[turn['qid']] = search_results
+            score = utils.ndcg(system_ranking, ground_truth, k=k)
+            scores.append(score)
+
+            if turn['number'] not in turn_depth_scores:
+                turn_depth_scores[turn['number']] = []
+            turn_depth_scores[turn['number']].append(score)
+    return data, scores, turn_depth_scores
