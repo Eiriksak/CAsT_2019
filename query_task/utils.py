@@ -62,7 +62,7 @@ def search(query, es, index, size=10):
         score = search_result['_score']
         res.append({
             'doc_id': doc_id,
-            'rank': i,
+            'rank': i+1, # Start at 1
             'score': score,
             'doc': doc
         })
