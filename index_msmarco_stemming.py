@@ -4,8 +4,12 @@ import elasticsearch
 from elasticsearch import Elasticsearch, helpers
 import re
 import time
+from dotenv import load_dotenv
+load_dotenv()
 
-es = Elasticsearch()
+
+
+es = Elasticsearch(http_auth=(os.environ['ES_USER'], os.environ['ES_PWD']))
 print(es.info())
 
 cwd = os.getcwd()
