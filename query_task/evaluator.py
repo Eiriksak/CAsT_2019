@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 
 es = Elasticsearch()
 
-# Load test topica
+# Load test topics
 path = "../treccastweb/2019/data/evaluation/evaluation_topics_v1.0.json"
 with open(path, 'r') as f:
     test_topics = json.load(f)
@@ -16,6 +16,14 @@ for topic in test_topics:
     utils.add_qid(topic)
 
 
+# Load train topics
+path = "../treccastweb/2019/data/training/train_topics_v1.0.json"
+with open(path, 'r') as f:
+    train_topics = json.load(f)
+
+for topic in train_topics:
+    utils.add_qid(topic)
+
 # Load test relevancy judgements
 test_qrels_path = "../baseline/2019qrels_nowapo.txt"
 with open(test_qrels_path, 'r') as f:
@@ -23,7 +31,12 @@ with open(test_qrels_path, 'r') as f:
     for line in f:
         test_qrels.append(line.strip())
 
-
+# Load train relevancy judgements
+train_qrels_path = "../baseline/train_topics_mod_nowapo.qrel"
+with open(train_qrels_path, 'r') as f:
+    train_qrels = []
+    for line in f:
+        train_qrels.append(line.strip())
 
 class QueryExpander(ABC):
     
