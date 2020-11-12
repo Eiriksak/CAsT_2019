@@ -152,3 +152,16 @@ def evaluate(es, index, size, qm, topics=test_topics, qrels=test_qrels, k=3):
                 turn_depth_scores[turn['number']] = []
             turn_depth_scores[turn['number']].append(score)
     return data, scores, turn_depth_scores
+
+
+def save_turn_depths(data, filename):
+    """ Stores NDCG@3 scores for each depth of a run in a JSON file
+    Args:
+        data (dict): depth as key, list of NDCG@3 scores as values
+        filename: name of the run file. will be stored under /results directory
+                  you should use the same filename as in to_run_file
+    """
+    
+    with open("../results/"+filename+".json", "w") as f:
+        json.dump(data, f, indent=4)
+    return
