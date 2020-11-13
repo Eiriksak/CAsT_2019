@@ -5,7 +5,6 @@ from elasticsearch import Elasticsearch
 import utils
 from abc import ABC, abstractmethod
 
-es = Elasticsearch()
 
 # Load test topics
 path = "../treccastweb/2019/data/evaluation/evaluation_topics_v1.0.json"
@@ -37,6 +36,31 @@ with open(train_qrels_path, 'r') as f:
     train_qrels = []
     for line in f:
         train_qrels.append(line.strip())
+        
+# Load resolved test queries (reverse engineer TSV format into same JSON format as the rest)
+path = "../treccastweb/2019/data/evaluation/evaluation_topics_annotated_resolved_v1.0.tsv"
+with open(path, 'r') as f:
+    test_topics_resolved = []
+    last_id = -1
+    for line in f:
+        line = line.strip()
+        qid, txt = line.split("\t")
+        topic_num, turn_num = qid.split("_")
+        if topic_num != last_id:
+            last_id = topic_num
+            test_topics_resolved.append({
+                'number': topic_num,
+                'turn':[],
+                'description': '',
+                'title': ''
+            })
+        
+        num = len(test_topics_resolved)-1
+        test_topics_resolved[num]['turn'].append({
+            'qid': qid,
+            'raw_utterance': txt,
+            'number': turn_num
+        }) 
 
 class QueryExpander(ABC):
     
