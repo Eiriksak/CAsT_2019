@@ -13,7 +13,7 @@ You can run the index files index_msmarco.py and index_car.py once processed xml
 under /collection.
 
 ### Produce OpenMatch results
-Please see [OpenMatch experiments page](https://github.com/thunlp/OpenMatch/blob/master/docs/experiments-msmarco.md) to see how to reproduce the OpenMatch results.
+Please see [OpenMatch experiments page](https://github.com/thunlp/OpenMatch/blob/master/docs/experiments-msmarco.md) to see how to reproduce the OpenMatch results. The only thing changed from these parameters are the queries, docs and trec file, all other parameters are as stated.
 
 
 ## Files and folders
