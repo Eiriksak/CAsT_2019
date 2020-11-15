@@ -14,3 +14,10 @@ under /collection.
 
 ### Produce OpenMatch results
 Please see [OpenMatch experiments page](https://github.com/thunlp/OpenMatch/blob/master/docs/experiments-msmarco.md) to see how to reproduce the OpenMatch results.
+
+
+## Files and folders
+- /results contains .trec-files produced by OpenMatch.
+- python scripts starting with "index" are the scripts used for indexing.
+- /runs contains run-files for both OpenMatch and trec-eval, both automatic queries and resolved queries.
+- re-ranking_with_LTR.ipynb is the notebook used to create training data, and train a PointWiseLTR model.
