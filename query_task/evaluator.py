@@ -163,10 +163,12 @@ def evaluate(es, index, size, qm, topics=test_topics, qrels=test_qrels, k=3):
         data: dictionary with search result data. can be fed directly into to_run_file
         scores: NDCG@k scores for all queries
         turn_depth_scores: NDCG@k scores at each depth of an conversation
+        queries: list of dictionaries showing the generated query for a given query id
     """
     data = {}
     turn_depth_scores = {}
     scores = []
+    queries = []
     for topic in topics:
         topic_num = topic['number']
         for depth, turn in enumerate(topic['turn']):
@@ -184,11 +186,12 @@ def evaluate(es, index, size, qm, topics=test_topics, qrels=test_qrels, k=3):
             data[turn['qid']] = search_results
             score = utils.ndcg(system_ranking, ground_truth, k=k)
             scores.append(score)
+            queries.append({'qid': turn['qid'], 'q': query})
 
             if turn['number'] not in turn_depth_scores:
                 turn_depth_scores[turn['number']] = []
             turn_depth_scores[turn['number']].append(score)
-    return data, scores, turn_depth_scores
+    return data, scores, turn_depth_scores, queries
 
 
 def save_turn_depths(data, filename):
@@ -202,3 +205,21 @@ def save_turn_depths(data, filename):
     with open("../results/"+filename+".json", "w") as f:
         json.dump(data, f, indent=4)
     return
+
+
+def to_query_file(qdata, filename):
+    """ Generates and stores a query file based on query data from a run
+    Args:
+        qdata (dict): list of dictionaries showing the generated query for a given query id
+        filename: name of the run file. will be stored under /runs directory
+    """
+    # qid query
+    res = []
+    for d in qdata:
+        q = ' '.join(d['q'])
+        inp = "{}\t{}".format(d['qid'], q)
+        res.append(inp)
+    res = "\n".join(res)
+    with open("../runs/qfile_"+filename+".tsv", 'w') as f:
+        f.write(res)
+    return res
