@@ -11,3 +11,6 @@ trec-cast-tools and trec-car-tools contains scripts that processes CAR and MS MA
 into correct xml format. Create a /collection folder from root and store these xml output files there.
 You can run the index files index_msmarco.py and index_car.py once processed xml files are available
 under /collection.
+
+### Produce OpenMatch results
+Please see [OpenMatch experiments page](https://github.com/thunlp/OpenMatch/blob/master/docs/experiments-msmarco.md) to see how to reproduce the OpenMatch results.
