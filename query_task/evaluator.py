@@ -172,6 +172,7 @@ def evaluate(es, index, size, qm, topics=test_topics, qrels=test_qrels, k=3):
     for topic in topics:
         topic_num = topic['number']
         for depth, turn in enumerate(topic['turn']):
+            depth += 1 # start from 1
             query = qm.get_query(query=turn['raw_utterance'], depth=depth, topic_num=topic_num)
             search_results, system_ranking, ground_truth = get_search_data(query,
                                                                            turn['qid'],
